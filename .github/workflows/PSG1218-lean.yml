@@ -24,6 +24,7 @@ env:
   REPO_BRANCH: master
   CONFIG_FILE: PSG1218a.config
   DIY_SH: diy.sh
+  UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -113,35 +114,23 @@ jobs:
       if: (!cancelled())
       run: df -hT
         
-    - name: Upload bin directory
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-      with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
-
-    - name: Organize files
+    - name: 整理文件并重命名
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
+      run: | 
         cd openwrt/bin/targets/*/*
         rm -rf packages
+        sudo -E apt-get -qq install rename
+        rename 's/.*${{ env.DEVICE_NAME }}/${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.DEVICE_NAME }}${{ env.WIFI_VERSION }}${{ env.SWITCH }}${{ env.BUILD_DOCKERMAN }}/' *
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Upload Firmware to Artifacts
-      uses: actions/upload-artifact@v4
-      if: env.UPLOAD_ARTIFACTS == 'true' && steps.compile.outcome == 'success' && !cancelled()
+    - name: 打包上传固件到Actions Artifacts
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: ${{ env.CONFIG_FILE }}_firmware_${{ env.Compile_Date }}
-        path: openwrt/bin/Firmware
-
-    - name: Upload bin to Artifacts
-      uses: actions/upload-artifact@v4
-      if: env.UPLOAD_BIN_ARTIFACTS == 'true' && steps.compile.outcome == 'success' && !cancelled()
-      with:
-        name: ${{ env.CONFIG_FILE }}_bin_${{ env.Compile_Date }}
-        path: openwrt/bin
+        name: ${{ env.FILE_DATE }}-${{ env.OPENWRT_NAME }}-${{ env.DEVICE_NAME }}${{ env.WIFI_VERSION }}${{ env.SWITCH }}${{ env.BUILD_DOCKERMAN }}
+        path: ${{ env.FIRMWARE }}
         
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@main
