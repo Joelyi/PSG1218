@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 # 修改机器名称
-sed -i "s/OpenWrt/PSG1218/g" package/base-files/files/bin/config_generate
+#sed -i "s/OpenWrt/PSG1218/g" package/base-files/files/bin/config_generate
 
 # 设置lan ip
 sed -i 's/192.168.1.1/192.168.2.1/g' package/base-files/files/bin/config_generate
@@ -21,4 +21,4 @@ sed -i 's/192.168.1.1/192.168.2.1/g' package/base-files/files/bin/config_generat
 #sed -i '/set luci.main.mediaurlbase=\/luci-static\/bootstrap/d' feeds/luci/themes/luci-theme-bootstrap/root/etc/uci-defaults/30_luci-theme-bootstrap
 
 # 修改自带默认主题
-sed -i 's/bootstrap/netgear/g' feeds/luci/collections/luci/Makefile
+#sed -i 's/bootstrap/netgear/g' feeds/luci/collections/luci/Makefile
